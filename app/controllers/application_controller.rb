@@ -1,13 +1,17 @@
-class HappinessController < UIViewController
+class ApplicationController < UIViewController
 
   include BubbleWrap::KVO
 
-  attr_accessor :happiness
+  attr_accessor :user, :group
 
-  def initWithHappiness(happiness)
+  def initWithUser(user, group: group)
     initWithNibName(nil, bundle:nil)
-    self.happiness = happiness
+    self.user = user
+    self.group = group
     self.edgesForExtendedLayout = UIRectEdgeNone
+
+    @api_handler ||= ApiHandler.alloc.init
+    @api_handler.get_average_group_score
 
     self
   end
@@ -31,7 +35,7 @@ class HappinessController < UIViewController
     self.view.addSubview(user_score_circle)
 
     user_score_value = UILabel.alloc.initWithFrame(CGRectZero)
-    user_score_value.text = '%.1f' % happiness.user_score.to_f
+    user_score_value.text = '%.1f' % user.score.to_f
     user_score_value.textColor = UIColor.whiteColor
     user_score_value.font = UIFont.fontWithName("Copperplate", size: 96)
     user_score_value.sizeToFit
@@ -54,9 +58,10 @@ class HappinessController < UIViewController
     user_score_increase.layer.mask = mask
 
     user_score_increase.when_tapped do
-      if happiness.user_score.round(1) < 5
-        self.happiness.user_score += 0.1
-        user_score_value.text = '%.1f' % happiness.user_score.to_f.round(1)
+      if user.score.round(1) < 5
+        self.user.score += 0.1
+        user_score_value.text = '%.1f' % user.score.to_f.round(1)
+        @api_handler.set_user_score
       end
     end
 
@@ -78,9 +83,10 @@ class HappinessController < UIViewController
     user_score_decrease.layer.mask = mask
 
     user_score_decrease.when_tapped do
-      if happiness.user_score.round(1) > 0
-        self.happiness.user_score -= 0.1
-        user_score_value.text = '%.1f' % (happiness.user_score.to_f.round(1) + 0) # Adding zero fixes the -0.0 problem - weird!
+      if user.score.round(1) > 0
+        self.user.score -= 0.1
+        user_score_value.text = '%.1f' % (user.score.to_f.round(1) + 0) # Adding zero fixes the -0.0 problem - weird!
+        @api_handler.set_user_score
       end
     end
 
@@ -107,14 +113,14 @@ class HappinessController < UIViewController
     self.view.addSubview(group_score_circle)
 
     group_score_value = UILabel.alloc.initWithFrame(CGRectZero)
-    group_score_value.text = '%.1f' % happiness.group_score.to_f
+    group_score_value.text = '%.1f' % group.score.to_f
     group_score_value.textColor = UIColor.whiteColor
     group_score_value.font = UIFont.fontWithName("Copperplate", size: 96)
     group_score_value.sizeToFit
     group_score_value.position = CGPointMake(group_score_circle.size.width * 0.5, group_score_circle.size.height * 0.5)
 
-    observe(self.happiness, :group_score) do |old_value, new_value|
-      group_score_value.text = new_value
+    observe(self.group, :score) do |old_value, new_value|
+      group_score_value.text = '%.1f' % new_value
       group_score_value.sizeToFit
     end
 

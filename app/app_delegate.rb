@@ -1,15 +1,18 @@
 class AppDelegate
+
+  attr_accessor :user, :group
+
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     rootViewController = UIViewController.alloc.init
-    rootViewController.title = 'HappinessMetric'
+    rootViewController.title = 'Happiness Metric'
     rootViewController.view.backgroundColor = UIColor.blackColor
 
-    @happiness = Happiness.load || Happiness.new(user_score: 2.5, group_score: 0)
-    @happiness.get_average_group_score
-    puts "group: #{@happiness.group_score}"
-    @happiness_controller = HappinessController.alloc.initWithHappiness(@happiness)
+    @user = User.load || User.new(id: BubbleWrap.create_uuid, score: 2.5)
+    @group = Group.load || Group.new(id: "68db153d-dbd4-43d2-bc61-85057562fd83", name: "Hooroo", score: 2.5)
 
-    @nav_controller = UINavigationController.alloc.initWithRootViewController(@happiness_controller)
+    @application_controller = ApplicationController.alloc.initWithUser(@user, group: @group)
+
+    @nav_controller = UINavigationController.alloc.initWithRootViewController(@application_controller)
 
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     @window.rootViewController = @nav_controller
@@ -19,13 +22,16 @@ class AppDelegate
   end
 
   def applicationDidEnterBackground(application)
-    puts "background: user_score: #{@happiness.user_score}"
-    @happiness.save
+    save
   end
 
   def applicationWillTerminate(application)
-    puts "terminate: user_score: #{@happiness.user_score}"
-    @happiness.save
+    save
+  end
+
+  def save
+    @user.save
+    @group.save
   end
 
 end
