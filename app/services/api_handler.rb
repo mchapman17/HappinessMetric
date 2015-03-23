@@ -8,8 +8,8 @@ class ApiHandler
     end
   end
 
-  def get_average_group_score
-    @conn.get("happiness/average_group_score/#{@app_delegate.group.id}") do |result|
+  def get_group_average_score
+    @conn.get("happiness/group_average_score/#{@app_delegate.group.id}") do |result|
       process_response(result)
     end
   end
@@ -23,9 +23,10 @@ class ApiHandler
 
   def process_response(result)
     if result.success?
-      @app_delegate.group.score = result.object["average_group_score"]
+      @app_delegate.group.average_score = result.object["group_average_score"]
+      @app_delegate.group.user_count = result.object["group_user_count"]
     elsif result.operation.response.statusCode.to_s =~ /40\d/
-      App.alert("Group Score update failed.")
+      App.alert("Group score update failed.")
     elsif result.failure?
       App.alert(result.error.localizedDescription)
     end

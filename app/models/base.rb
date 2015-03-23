@@ -25,14 +25,12 @@ class Base
 
   def save
     defaults = NSUserDefaults.standardUserDefaults
-    defaults[@storage_key] = NSKeyedArchiver.archivedDataWithRootObject(self)
+    defaults[self.class.storage_key] = NSKeyedArchiver.archivedDataWithRootObject(self)
   end
 
   def self.load
     defaults = NSUserDefaults.standardUserDefaults
     data = defaults[storage_key]
-    puts "storage key: #{storage_key}"
-    puts "data: #{data}"
     NSKeyedUnarchiver.unarchiveObjectWithData(data) if data
   end
 
