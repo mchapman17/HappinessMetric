@@ -10,6 +10,7 @@ class ApplicationController < UIViewController
     @group = group
     @api_handler = api_handler
 
+    self.title = 'Happiness Metric'
     self.edgesForExtendedLayout = UIRectEdgeNone
     self
   end
@@ -18,6 +19,8 @@ class ApplicationController < UIViewController
     super
 
     self.view.backgroundColor = UIColor.blackColor
+
+    add_group_settings_button
 
     add_user_score_label
     add_user_score_circle
@@ -32,6 +35,19 @@ class ApplicationController < UIViewController
     add_group_average_score_value
     add_group_average_score_activity
     add_group_user_count_label
+  end
+
+  def add_group_settings_button
+    button = UIBarButtonItem.alloc.initWithTitle("Settings",
+      style: UIBarButtonItemStyleBordered,
+      target: self,
+      action: 'show_group_settings')
+    self.navigationItem.rightBarButtonItem = button
+  end
+
+  def show_group_settings
+    controller = GroupSettingsController.alloc.initWithGroup(@group)
+    self.navigationController.pushViewController(controller, animated: true)
   end
 
   def add_user_score_label
@@ -56,7 +72,7 @@ class ApplicationController < UIViewController
 
   def add_user_score_value
     @user_score_value = UILabel.alloc.initWithFrame(CGRectZero)
-    @user_score_value.text = format_score(@user.score)
+    @user_score_value.text = format_user_score(@user.score)
     @user_score_value.textColor = UIColor.whiteColor
     @user_score_value.font = UIFont.fontWithName("Copperplate", size: 96)
     @user_score_value.sizeToFit
@@ -66,7 +82,7 @@ class ApplicationController < UIViewController
   end
 
   def update_user_score_value
-    @user_score_value.text = format_score(@user.score)
+    @user_score_value.text = format_user_score(@user.score)
   end
 
   def add_user_score_increaser
@@ -194,14 +210,14 @@ class ApplicationController < UIViewController
 
   def add_group_average_score_value
     @group_average_score_value = UILabel.alloc.initWithFrame(CGRectZero)
-    @group_average_score_value.text = format_score(@group.average_score)
+    @group_average_score_value.text = format_group_score(@group.average_score)
     @group_average_score_value.textColor = UIColor.whiteColor
-    @group_average_score_value.font = UIFont.fontWithName("Copperplate", size: 96)
+    @group_average_score_value.font = UIFont.fontWithName("Copperplate", size: 72)
     @group_average_score_value.sizeToFit
     @group_average_score_value.position = CGPointMake(circle_radius, circle_radius)
 
     observe(@group, :average_score) do |old_value, new_value|
-      @group_average_score_value.text = format_score(new_value)
+      @group_average_score_value.text = format_group_score(new_value)
       @group_average_score_value.sizeToFit
     end
 
@@ -228,8 +244,7 @@ class ApplicationController < UIViewController
     label.textAlignment = UITextAlignmentCenter
 
     observe(@group, :user_count) do |old_value, new_value|
-      label.text = group_user_count_label_text # new_value.to_s
-      label.sizeToFit
+      label.text = group_user_count_label_text
     end
 
     self.view.addSubview(label)
@@ -253,8 +268,12 @@ class ApplicationController < UIViewController
     score >= @group.min_score && score <= @group.max_score
   end
 
-  def format_score(score)
+  def format_user_score(score)
     '%.1f' % score.to_f
+  end
+
+  def format_group_score(score)
+    '%.2f' % score.to_f
   end
 
   def screen_width
