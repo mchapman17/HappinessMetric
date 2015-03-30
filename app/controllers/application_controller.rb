@@ -46,8 +46,8 @@ class ApplicationController < UIViewController
   end
 
   def show_group_settings
-    controller = GroupSettingsController.alloc.initWithGroup(@group)
-    self.navigationController.pushViewController(controller, animated: true)
+    @group_settings_controller ||= GroupSettingsController.alloc.initWithGroup(@group)
+    self.navigationController.pushViewController(@group_settings_controller, animated: true)
   end
 
   def add_user_score_label
@@ -188,7 +188,7 @@ class ApplicationController < UIViewController
 
   def add_group_average_score_label
     label = UILabel.alloc.initWithFrame(CGRectZero)
-    label.text = "#{@group.name}\nHappiness Score"
+    label.text = group_name_label_text
     label.textColor = Group::COLOR
     label.font = UIFont.fontWithName("Copperplate", size: 28)
     label.numberOfLines = 0
@@ -197,7 +197,16 @@ class ApplicationController < UIViewController
     label.layer.anchorPoint = CGPointMake(0.5, 0.0)
     label.textAlignment = UITextAlignmentCenter
 
+    observe(@group, :name) do |old_value, new_value|
+      label.text = group_name_label_text
+      label.sizeToFit
+    end
+
     self.view.addSubview(label)
+  end
+
+  def group_name_label_text
+    "#{@group.name}\nHappiness Score"
   end
 
   def add_group_average_score_circle

@@ -1,38 +1,75 @@
-class GroupSettingsController < UIViewController
+class GroupSettingsController < Formotion::FormController
 
   def initWithGroup(group)
-    self.initWithNibName(nil, bundle:nil)
     @group = group
+    form = create_form
+    self.initWithForm(form)
 
     self.title = "Group Settings"
     self.view.backgroundColor = UIColor.whiteColor
     self
   end
 
+  def create_form
+    Formotion::Form.new({
+      sections: [{
+        title: "",
+        rows: [
+          {
+            title: "Name",
+            key: :group_name,
+            value: @group.name,
+            type: :string,
+            input_accessory: :done,
+            done_action: lambda { save }
+          },
+          {
+            title: "Password",
+            key: :password,
+            value: "********",
+            type: :string,
+            input_accessory: :done,
+            done_action: lambda { save }
+          },
+          {
+            title: "Maximum Score",
+            key: :maximum_score_picker,
+            items: (1..10).map { |v| v.to_s },
+            value: @group.max_score.to_i.to_s,
+            type: :picker,
+            input_accessory: :done,
+            done_action: lambda { save }
+          },
+          {
+            title: "Interval",
+            key: :interval_picker,
+            items: (0.1..1.0).step(0.1).map { |v| v.round(1).to_s },
+            value: @group.interval.to_f.round(1).to_s,
+            type: :picker,
+            input_accessory: :done,
+            done_action: lambda { save }
+          },
+          {
+            title: "Reset Scores",
+            key: :reset_scores,
+            type: :static
+          }
+        ]
+      }]
+    })
+  end
+
+  def save
+    data = self.form.render
+    @group.name = data[:group_name]
+    @group.password = data[:password]
+    @group.max_score = data[:maximum_score_picker].to_f.round(1)
+    @group.interval = data[:interval_picker].to_f.round(1)
+    @group.save
+  end
+
   def viewDidLoad
     super
-
-    @table = UITableView.alloc.initWithFrame(self.view.bounds)
-    @table.autoresizingMask = UIViewAutoresizingFlexibleHeight
-
-    self.view.addSubview(@table)
-
-    @table.dataSource = self
-
-    @data = ["Name", "Password", "Min. Score", "Max. Score", "Interval", "Reset Scores"]
-  end
-
-  def tableView(tableView, cellForRowAtIndexPath: indexPath)
-    @reuseIdentifier ||= "settings_row"
-    cell = tableView.dequeueReusableCellWithIdentifier(@reuseIdentifier)
-    cell ||= UITableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:@reuseIdentifier)
-    cell.textLabel.text = @data[indexPath.row]
-
-    cell
-  end
-
-  def tableView(tableView, numberOfRowsInSection: section)
-    @data.count
   end
 
 end
