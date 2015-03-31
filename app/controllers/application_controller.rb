@@ -18,10 +18,10 @@ class ApplicationController < UIViewController
   def viewDidLoad
     super
 
-    self.view.backgroundColor = UIColor.blackColor
-
+    add_background
     add_group_settings_button
 
+    add_user_panel
     add_user_score_label
     add_user_score_circle
     add_user_score_value
@@ -30,11 +30,17 @@ class ApplicationController < UIViewController
 
     add_separator
 
+    add_group_panel
     add_group_average_score_label
     add_group_average_score_circle
     add_group_average_score_value
     add_group_average_score_activity
     add_group_user_count_label
+  end
+
+  def add_background
+    background = UIImageView.alloc.initWithImage(UIImage.imageNamed('background.png'))
+    self.view.addSubview(background)
   end
 
   def add_group_settings_button
@@ -50,31 +56,36 @@ class ApplicationController < UIViewController
     self.navigationController.pushViewController(@group_settings_controller, animated: true)
   end
 
+  def add_user_panel
+    @user_panel = UIView.alloc.initWithFrame(user_panel_frame)
+    self.view.addSubview(@user_panel)
+  end
+
   def add_user_score_label
     label = UILabel.alloc.initWithFrame(CGRectZero)
     label.text = "Your Happiness Score"
-    label.textColor = User::COLOR
-    label.font = UIFont.fontWithName("Copperplate", size: 28)
+    label.textColor = Group::COLOR # UIColor.whiteColor # User::COLOR
+    label.font = UIFont.fontWithName("HelveticaNeue-Medium", size: 24)
     label.sizeToFit
-    label.position = CGPointMake(screen_width_middle, score_label_offset_top)
+    label.position = CGPointMake(user_panel_mid_x, user_score_label_offset_top)
     label.textAlignment = UITextAlignmentCenter
 
-    self.view.addSubview(label)
+    @user_panel.addSubview(label)
   end
 
   def add_user_score_circle
     @user_score_circle = UIView.alloc.initWithFrame(user_score_circle_frame)
+    @user_score_circle.backgroundColor = UIColor.darkGrayColor.colorWithAlphaComponent(0.5) # User::COLOR
     @user_score_circle.layer.cornerRadius = circle_radius
-    @user_score_circle.backgroundColor = User::COLOR
 
-    self.view.addSubview(@user_score_circle)
+    @user_panel.addSubview(@user_score_circle)
   end
 
   def add_user_score_value
     @user_score_value = UILabel.alloc.initWithFrame(CGRectZero)
     @user_score_value.text = format_user_score(@user.score)
     @user_score_value.textColor = UIColor.whiteColor
-    @user_score_value.font = UIFont.fontWithName("Copperplate", size: 96)
+    @user_score_value.font = UIFont.fontWithName("HelveticaNeue", size: 84)
     @user_score_value.sizeToFit
     @user_score_value.position = CGPointMake(circle_radius, circle_radius)
 
@@ -87,12 +98,13 @@ class ApplicationController < UIViewController
 
   def add_user_score_increaser
     increaser = UIView.alloc.initWithFrame(score_increaser_frame)
-    increaser.backgroundColor = User::COLOR
+    increaser.backgroundColor = "#FFFF19".to_color  # User::COLOR
+    increaser.layer.opacity = 0.8
 
     triangle = UIBezierPath.alloc.init
     triangle.moveToPoint(CGPointZero)
-    triangle.addLineToPoint(CGPointMake(0, circle_radius))
-    triangle.addLineToPoint(CGPointMake(circle_radius * 0.5, circle_radius * 0.5))
+    triangle.addLineToPoint(CGPointMake(0, circle_radius * 0.5))
+    triangle.addLineToPoint(CGPointMake(circle_radius * 0.25, circle_radius * 0.25))
     triangle.addLineToPoint(CGPointZero)
 
     mask = CAShapeLayer.alloc.init
@@ -101,6 +113,8 @@ class ApplicationController < UIViewController
     increaser.layer.mask = mask
 
     increaser.when_tapped do
+      next if @user.score >= @group.max_score
+
       @increaser_tapped = Time.now
 
       animate_score_change(increaser)
@@ -120,18 +134,19 @@ class ApplicationController < UIViewController
       end
     end
 
-    self.view.addSubview(increaser)
+    @user_panel.addSubview(increaser)
   end
 
   def add_user_score_decreaser
     decreaser = UIView.alloc.initWithFrame(score_decreaser_frame)
-    decreaser.backgroundColor = User::COLOR
+    decreaser.backgroundColor = "#FFFF19".to_color  # User::COLOR
+    decreaser.layer.opacity = 0.8
 
     triangle = UIBezierPath.alloc.init
-    triangle.moveToPoint(CGPointMake(90, 0))
-    triangle.addLineToPoint(CGPointMake(45, 45))
-    triangle.addLineToPoint(CGPointMake(90, 90))
-    triangle.addLineToPoint(CGPointMake(90, 0))
+    triangle.moveToPoint(CGPointMake(circle_radius * 0.5, 0))
+    triangle.addLineToPoint(CGPointMake(circle_radius * 0.25, circle_radius * 0.25))
+    triangle.addLineToPoint(CGPointMake(circle_radius * 0.5, circle_radius * 0.5))
+    triangle.addLineToPoint(CGPointMake(circle_radius * 0.5, 0))
 
     mask = CAShapeLayer.alloc.init
     mask.frame = decreaser.bounds
@@ -139,6 +154,9 @@ class ApplicationController < UIViewController
     decreaser.layer.mask = mask
 
     decreaser.when_tapped do
+      puts "user: #{@user.score.round(1)}  min: #{@group.min_score}"
+      next if @user.score.round(1) <= @group.min_score
+
       @decreaser_tapped = Time.now
 
       animate_score_change(decreaser)
@@ -158,19 +176,19 @@ class ApplicationController < UIViewController
       end
     end
 
-    self.view.addSubview(decreaser)
+    @user_panel.addSubview(decreaser)
   end
 
   def animate_score_change(view)
-    offset = 4
-    UIView.animateWithDuration(0.05,
+    offset = 2
+    UIView.animateWithDuration(0.1,
       animations: -> {
         view.position = CGPointMake(view.position.x + offset, view.position.y + offset)
-        view.alpha = 0.7
+        view.alpha = 0.6
       },
       completion: -> finished {
         view.position = CGPointMake(view.position.x - offset, view.position.y - offset)
-        view.alpha = 1.0
+        view.alpha = 0.8
       }
     )
   end
@@ -180,20 +198,25 @@ class ApplicationController < UIViewController
   end
 
   def add_separator
-    line = UIView.alloc.initWithFrame(CGRectMake(0, screen_height_middle - separator_offset_bottom, screen_width, 1))
-    line.backgroundColor = UIColor.whiteColor
+    @separator = UIView.alloc.initWithFrame(CGRectMake(0, user_panel_height, screen_width, 1))
+    @separator.backgroundColor = UIColor.whiteColor
 
-    self.view.addSubview(line)
+    self.view.addSubview(@separator)
+  end
+
+  def add_group_panel
+    @group_panel = UIView.alloc.initWithFrame(group_panel_frame)
+    self.view.addSubview(@group_panel)
   end
 
   def add_group_average_score_label
     label = UILabel.alloc.initWithFrame(CGRectZero)
     label.text = group_name_label_text
     label.textColor = Group::COLOR
-    label.font = UIFont.fontWithName("Copperplate", size: 28)
+    label.font = UIFont.fontWithName("HelveticaNeue-Medium", size: 24)
     label.numberOfLines = 0
     label.sizeToFit
-    label.position = CGPointMake(screen_width_middle, screen_height_middle + score_label_offset_top - separator_offset_bottom)
+    label.position = group_average_score_label_position
     label.layer.anchorPoint = CGPointMake(0.5, 0.0)
     label.textAlignment = UITextAlignmentCenter
 
@@ -202,7 +225,7 @@ class ApplicationController < UIViewController
       label.sizeToFit
     end
 
-    self.view.addSubview(label)
+    @group_panel.addSubview(label)
   end
 
   def group_name_label_text
@@ -212,16 +235,16 @@ class ApplicationController < UIViewController
   def add_group_average_score_circle
     @group_average_score_circle = UIView.alloc.initWithFrame(group_average_score_circle_frame)
     @group_average_score_circle.layer.cornerRadius = circle_radius
-    @group_average_score_circle.backgroundColor = Group::COLOR
+    @group_average_score_circle.backgroundColor = UIColor.clearColor # Group::COLOR
 
-    self.view.addSubview(@group_average_score_circle)
+    @group_panel.addSubview(@group_average_score_circle)
   end
 
   def add_group_average_score_value
     @group_average_score_value = UILabel.alloc.initWithFrame(CGRectZero)
     @group_average_score_value.text = format_group_score(@group.average_score)
     @group_average_score_value.textColor = UIColor.whiteColor
-    @group_average_score_value.font = UIFont.fontWithName("Copperplate", size: 72)
+    @group_average_score_value.font = UIFont.fontWithName("HelveticaNeue", size: 96)
     @group_average_score_value.sizeToFit
     @group_average_score_value.position = CGPointMake(circle_radius, circle_radius)
 
@@ -246,9 +269,9 @@ class ApplicationController < UIViewController
     label = UILabel.alloc.initWithFrame(CGRectZero)
     label.text = group_user_count_label_text
     label.textColor = Group::COLOR
-    label.font = UIFont.fontWithName("Copperplate", size: 18)
+    label.font = UIFont.fontWithName("HelveticaNeue", size: 18)
     label.sizeToFit
-    label.position = CGPointMake(screen_width_middle, CGRectGetMaxY(@group_average_score_circle.frame) + score_label_offset_top)
+    label.position = group_user_count_label_position
     label.layer.anchorPoint = CGPointMake(0.5, 0.0)
     label.textAlignment = UITextAlignmentCenter
 
@@ -256,7 +279,11 @@ class ApplicationController < UIViewController
       label.text = group_user_count_label_text
     end
 
-    self.view.addSubview(label)
+    @group_panel.addSubview(label)
+  end
+
+  def group_user_count_label_position
+    CGPointMake(group_panel_mid_x, CGRectGetMaxY(@group_average_score_circle.frame) + group_score_label_offset_top)
   end
 
   def group_user_count_label_text
@@ -264,17 +291,9 @@ class ApplicationController < UIViewController
   end
 
   def change_user_score_by(amount)
-    score = @user.score.round(1) + amount
-
-    if user_score_in_range?(score)
-      @user.score = score
-      @user.save
-      update_user_score_value
-    end
-  end
-
-  def user_score_in_range?(score)
-    score >= @group.min_score && score <= @group.max_score
+    @user.score = @user.score.round(1) + amount + 0.0 # the + 0.0 fixes weird float bug when score is set to zero
+    @user.save
+    update_user_score_value
   end
 
   def format_user_score(score)
@@ -286,7 +305,7 @@ class ApplicationController < UIViewController
   end
 
   def screen_width
-    UIScreen.mainScreen.bounds.size.width
+    UIScreen.mainScreen.applicationFrame.size.width
   end
 
   def screen_width_middle
@@ -294,51 +313,110 @@ class ApplicationController < UIViewController
   end
 
   def screen_height
-    UIScreen.mainScreen.bounds.size.height
+    UIScreen.mainScreen.applicationFrame.size.height
   end
 
   def screen_height_middle
     screen_height * 0.5
   end
 
-  def score_label_offset_top
-    20
+  def user_panel_frame
+    CGRectMake(0, 0, user_panel_width, user_panel_height)
+  end
+
+  def user_panel_width
+    screen_width
+  end
+
+  def user_panel_height
+    screen_height * 0.5
+  end
+
+  def user_panel_mid_x
+    user_panel_width * 0.5
+  end
+
+  def user_panel_mid_y
+    user_panel_height * 0.5
+  end
+
+  def user_score_label_offset_top
+    user_panel_height * 0.1
   end
 
   def user_score_circle_frame
-    CGRectMake(screen_width_middle - circle_radius, circle_offset_top, circle_diameter, circle_diameter)
+    CGRectMake(user_panel_mid_x - circle_radius, user_panel_mid_y - circle_radius, circle_diameter, circle_diameter)
+  end
+
+  def group_panel_frame
+    CGRectMake(0, user_panel_height, group_panel_width, group_panel_height)
+  end
+
+  def group_panel_width
+    screen_width
+  end
+
+  def group_panel_height
+    screen_height - user_panel_height
+  end
+
+  def group_panel_mid_x
+    group_panel_width * 0.5
+  end
+
+  def group_panel_mid_y
+    group_panel_height * 0.5
+  end
+
+  def group_score_label_offset_top
+    group_panel_height * 0.1
   end
 
   def circle_radius
-    90
+    100
   end
 
   def circle_diameter
     circle_radius * 2
   end
 
-  def circle_offset_top
-    50
-  end
-
   def score_increaser_frame
-    CGRectMake(screen_width_middle + score_changer_offset_center, circle_radius, circle_radius, circle_radius)
+    CGRectMake(
+      user_panel_mid_x + score_changer_offset_center,
+      user_panel_mid_y - circle_radius * 0.25,
+      circle_radius * 0.5,
+      circle_radius * 0.5
+    )
   end
 
   def score_decreaser_frame
-    CGRectMake(screen_width_middle - score_changer_offset_center - circle_radius, circle_radius, circle_radius, circle_radius)
+    CGRectMake(
+      user_panel_mid_x - score_changer_offset_center - circle_radius * 0.5,
+      user_panel_mid_y - circle_radius * 0.25,
+      circle_radius * 0.5,
+      circle_radius * 0.5
+    )
   end
 
   def score_changer_offset_center
-    110
+    circle_radius * 1.2
   end
 
-  def separator_offset_bottom
-    80
+  def group_average_score_label_position
+    CGPointMake(group_panel_mid_x, group_score_label_offset_top)
   end
 
   def group_average_score_circle_frame
-    CGRectMake(screen_width_middle - circle_radius, screen_height_middle + circle_offset_top + circle_offset_top - separator_offset_bottom, circle_diameter, circle_diameter)
+    CGRectMake(
+      group_panel_mid_x - circle_radius,
+      group_panel_mid_y - circle_radius,
+      circle_diameter,
+      circle_diameter
+    )
+  end
+
+  def separator_y
+    CGRectGetMidY(@separator.bounds)
   end
 
 end
