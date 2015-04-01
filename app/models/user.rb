@@ -9,4 +9,8 @@ class User < Base
     "user"
   end
 
+  def formatted_score
+    '%.1f' % score.to_f
+  end
+
 end

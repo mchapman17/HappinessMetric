@@ -14,4 +14,8 @@ class Group < Base
     "group"
   end
 
+  def formatted_average_score
+    '%.2f' % average_score.to_f
+  end
+
 end

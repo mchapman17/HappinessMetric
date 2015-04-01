@@ -10,10 +10,9 @@ class AppDelegate
     @user = User.load || User.new(id: BubbleWrap.create_uuid, score: 0.0)
     @group = Group.load || Group.default
 
-    @api_handler = ApiHandler.alloc.init
-    @api_handler.get_group_average_score
+    ApiHandler.alloc.init.get_group_average_score
 
-    @application_controller = ApplicationController.alloc.initWithUser(@user, group: @group, api_handler: @api_handler)
+    @application_controller = ApplicationController.alloc.initWithUser(@user, group: @group)
 
     @nav_controller = UINavigationController.alloc.initWithRootViewController(@application_controller)
 
