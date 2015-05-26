@@ -36,7 +36,11 @@ class GroupPanel < UIView
   end
 
   def group_name_label_text
-    "#{@group.name}\nHappiness Score"
+    if @group.id
+      "#{@group.name}\nHappiness Score"
+    else
+      "Create or Join a Group"
+    end
   end
 
   def add_circle
@@ -54,7 +58,7 @@ class GroupPanel < UIView
     @value.font = UIFont.fontWithName("HelveticaNeue", size: 96)
     @value.sizeToFit
     @value.position = CGPointMake(circle_radius, circle_radius)
-    @value.tag = "group_value"
+    # @value.tag = "group_value"
 
     observe(@group, :average_score) do |old_value, new_value|
       @value.text = @group.formatted_average_score
@@ -69,7 +73,7 @@ class GroupPanel < UIView
     @indicator.color = @value.textColor
     @indicator.transform = CGAffineTransformMakeScale(2.0, 2.0)
     @indicator.hidesWhenStopped = true
-    @indicator.tag = "group_activity_indicator"
+    # @indicator.tag = "group_activity_indicator"
 
     @circle.addSubview(@indicator)
   end

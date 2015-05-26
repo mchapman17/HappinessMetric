@@ -2,12 +2,15 @@ class GroupSettingsController < Formotion::FormController
 
   def initWithGroup(group)
     @group = group
-    form = create_form
-    self.initWithForm(form)
+    self.initWithForm(create_form)
 
     self.title = "Group Settings"
     self.view.backgroundColor = UIColor.whiteColor
     self
+  end
+
+  def viewDidLoad
+    super
   end
 
   def create_form
@@ -50,6 +53,15 @@ class GroupSettingsController < Formotion::FormController
             done_action: lambda { save }
           },
           {
+            title: "Exclude Score After Weeks",
+            key: :exclude_score,
+            items: ["0", "1", "2", "3", "4", "6", "12"],
+            value: @group.exclude_score_after_weeks.to_i.to_s,
+            type: :picker,
+            input_accessory: :done,
+            done_action: lambda { save }
+          },
+          {
             title: "Reset Scores",
             key: :reset_scores,
             type: :static
@@ -66,10 +78,6 @@ class GroupSettingsController < Formotion::FormController
     @group.max_score = data[:maximum_score_picker].to_f.round(1)
     @group.interval = data[:interval_picker].to_f.round(1)
     @group.save
-  end
-
-  def viewDidLoad
-    super
   end
 
 end

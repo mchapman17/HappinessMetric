@@ -1,6 +1,6 @@
 class ScoreChanger < UIView
 
-  def initWithFrame(frame, shape: shape, interval: interval)
+  def initWithFrame(frame, shape: shape, interval_modifier: interval_modifier)
     self.initWithFrame(frame)
 
     @app_delegate ||= UIApplication.sharedApplication.delegate
@@ -16,6 +16,9 @@ class ScoreChanger < UIView
     self.layer.mask = mask
 
     self.when_tapped do
+      next unless @group.id
+
+      interval = @group.interval.to_f * interval_modifier.to_f
       score = @user.score + interval
       next if score_out_of_range?(score)
 
@@ -57,13 +60,12 @@ class ScoreChanger < UIView
   end
 
   def update_user_score(score)
-    @user.score = score.round(1) + 0.0 # the + 0.0 fixes weird float bug when score is set to zero
+    @user.score = score.round(1) + 0.0 # the +0.0 fixes weird float bug when score is set to zero
     @user.save
   end
 
   def score_out_of_range?(score)
-    puts "score: #{score.round(1)} min: #{@group.min_score} max: #{@group.max_score} result: #{score.round(1) < @group.min_score || score.round(1) > @group.max_score}"
-    score.round(1) < @group.min_score || score.round(1) > @group.max_score
+    score.round(1) < @group.min_score.to_f.round(1) || score.round(1) > @group.max_score.to_f.round(1)
   end
 
   def score_change_delay

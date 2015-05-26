@@ -56,12 +56,12 @@ class UserPanel < UIView
   end
 
   def add_increaser
-    increaser = ScoreChanger.alloc.initWithFrame(increaser_frame, shape: increaser_shape, interval: @group.interval)
+    increaser = ScoreChanger.alloc.initWithFrame(increaser_frame, shape: increaser_shape, interval_modifier: 1)
     self.addSubview(increaser)
   end
 
   def add_decreaser
-    decreaser = ScoreChanger.alloc.initWithFrame(decreaser_frame, shape: decreaser_shape, interval: -@group.interval)
+    decreaser = ScoreChanger.alloc.initWithFrame(decreaser_frame, shape: decreaser_shape, interval_modifier: -1)
     self.addSubview(decreaser)
   end
 

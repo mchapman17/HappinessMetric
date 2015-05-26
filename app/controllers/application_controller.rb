@@ -3,7 +3,7 @@ class ApplicationController < UIViewController
   attr_accessor :user, :group
 
   def initWithUser(user, group: group)
-    initWithNibName(nil, bundle:nil)
+    initWithNibName(nil, bundle: nil)
     @user = user
     @group = group
 
@@ -16,16 +16,32 @@ class ApplicationController < UIViewController
     super
 
     add_background
+    add_join_create_group_button
     add_group_settings_button
 
     add_user_panel
     add_separator
     add_group_panel
+
+    ApiHandler.alloc.init.get_group_average_score if @group.id
   end
 
   def add_background
     background = UIImageView.alloc.initWithImage(UIImage.imageNamed('background.png'))
     self.view.addSubview(background)
+  end
+
+  def add_join_create_group_button
+    button = UIBarButtonItem.alloc.initWithTitle("Join/Create",
+      style: UIBarButtonItemStyleBordered,
+      target: self,
+      action: 'show_join_create_group')
+    self.navigationItem.leftBarButtonItem = button
+  end
+
+  def show_join_create_group
+    @join_create_group_controller ||= JoinCreateGroupController.alloc.init
+    self.navigationController.pushViewController(@join_create_group_controller, animated: true)
   end
 
   def add_group_settings_button
