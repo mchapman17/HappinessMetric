@@ -4,6 +4,7 @@ require 'motion/project/template/ios'
 require 'bubble-wrap'
 require 'formotion'
 require 'bundler'
+# require 'motion-support/inflector'
 Bundler.require
 
 VERSION = '1.0'

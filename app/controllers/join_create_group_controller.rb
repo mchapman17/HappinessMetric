@@ -34,13 +34,6 @@ class JoinCreateGroupController < Formotion::FormController
 
   def viewDidLoad
     super
-
-    # add_background
-  end
-
-  def add_background
-    background = UIImageView.alloc.initWithImage(UIImage.imageNamed('background.png'))
-    self.view.addSubview(background)
   end
 
   def create_form
@@ -51,7 +44,7 @@ class JoinCreateGroupController < Formotion::FormController
       section.build_row do |row|
         row.title = "Name"
         row.key = :join_name
-        row.placeholder = "Group Name"
+        row.placeholder = "required"
         row.type = :string
         row.auto_correction = :no
       end
@@ -77,7 +70,7 @@ class JoinCreateGroupController < Formotion::FormController
       section.build_row do |row|
         row.title = "Name"
         row.key = :create_name
-        row.placeholder = "Group Name"
+        row.placeholder = "required"
         row.type = :string
         row.auto_correction = :no
       end
@@ -112,18 +105,41 @@ class JoinCreateGroupController < Formotion::FormController
 
   def join_group
     data = @form.render
-    if ApiHandler.alloc.init.join_group(data[:join_name], data[:join_password])
-      puts "---- Joined #{data[:join_name]}!"
-      self.dismissViewControllerAnimated(true, completion: nil)
-    else
-      puts "---- didn't Join #{data[:join_name]}!"
+    params = { name: data[:join_name], password: data[:join_password] }
+
+    ApiHandler.alloc.init.join_group(params) do |result|
+      if result.success?
+        self.navigationController.popViewControllerAnimated(true)
+        reset_form_values
+      end
     end
   end
 
   def create_group
     data = @form.render
-    raise "Passwords don't match." if data[:create_password] != data[:create_password_confirm]
-    ApiHandler.alloc.init.create_group(data[:create_name], data[:create_password])
+    params = { name: data[:create_name], password: data[:create_password] }
+
+    # raise "Passwords don't match." if data[:create_password] != data[:create_password_confirm]
+
+    ApiHandler.alloc.init.create_group(params) do |result|
+      if result.success?
+        self.navigationController.popViewControllerAnimated(true)
+        reset_form_values
+      end
+    end
+  end
+
+
+  private
+
+  def reset_form_values
+    @form.values = {
+      join_name: nil,
+      join_password: nil,
+      create_name: nil,
+      create_password: nil,
+      create_password_confirm: nil
+    }
   end
 
 end

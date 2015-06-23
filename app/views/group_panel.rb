@@ -82,7 +82,7 @@ class GroupPanel < UIView
     @user_count_label = UILabel.alloc.initWithFrame(CGRectZero)
     @user_count_label.text = user_count_label_text
     @user_count_label.textColor = Group::COLOR
-    @user_count_label.font = UIFont.fontWithName("HelveticaNeue", size: 18)
+    @user_count_label.font = UIFont.fontWithName("HelveticaNeue", size: 16)
     @user_count_label.sizeToFit
     @user_count_label.position = user_count_label_position
     @user_count_label.layer.anchorPoint = CGPointMake(0.5, 0.0)
@@ -124,11 +124,15 @@ class GroupPanel < UIView
   end
 
   def user_count_label_position
-    CGPointMake(mid_x, CGRectGetMaxY(@circle.frame) + label_offset_top)
+    CGPointMake(mid_x, CGRectGetMaxY(@circle.frame) - label_offset_top)
   end
 
   def user_count_label_text
-    "Users: #{@group.user_count}"
+    if @group.user_count == 1
+      "1 score"
+    else
+      "#{@group.user_count} scores"
+    end
   end
 
 end

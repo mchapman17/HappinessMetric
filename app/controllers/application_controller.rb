@@ -23,7 +23,7 @@ class ApplicationController < UIViewController
     add_separator
     add_group_panel
 
-    ApiHandler.alloc.init.get_group_average_score if @group.id
+    ApiHandler.alloc.init.get_group if @group.id
   end
 
   def add_background

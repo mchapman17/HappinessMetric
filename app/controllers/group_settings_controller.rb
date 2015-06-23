@@ -1,3 +1,12 @@
+# this is a workaround to give the ability to style Formotion controls
+module Formotion
+  class Form < Formotion::Base
+    def tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
+      # cell.textLabel.textColor = UIColor.greenColor
+    end
+  end
+end
+
 class GroupSettingsController < Formotion::FormController
 
   def initWithGroup(group)
@@ -6,6 +15,21 @@ class GroupSettingsController < Formotion::FormController
 
     self.title = "Group Settings"
     self.view.backgroundColor = UIColor.whiteColor
+
+    # seems to be the only way to style the form currently in Formotion
+    self.form.instance_eval do
+      def tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
+        if submit_button?(cell)
+          cell.textColor = UIColor.whiteColor
+          cell.contentView.backgroundColor = Group::COLOR
+        end
+      end
+
+      def submit_button?(cell)
+        ["Update Settings"].include?(cell.text)
+      end
+    end
+
     self
   end
 
@@ -13,71 +37,83 @@ class GroupSettingsController < Formotion::FormController
     super
   end
 
+  def viewWillAppear(animated)
+    super
+
+    if @form
+      @form.values = {
+        name: @group.name,
+        password: @group.password,
+        max_score: @group.max_score,
+        interval: @group.interval,
+        exclude_score_after_weeks: @group.exclude_score_after_weeks
+      }
+    end
+  end
+
   def create_form
-    Formotion::Form.new({
+    @form = Formotion::Form.new({
       sections: [{
         title: "",
         rows: [
           {
             title: "Name",
-            key: :group_name,
+            key: :name,
             value: @group.name,
             type: :string,
-            input_accessory: :done,
-            done_action: lambda { save }
+            input_accessory: :done
           },
           {
             title: "Password",
             key: :password,
             value: "********",
             type: :string,
-            input_accessory: :done,
-            done_action: lambda { save }
+            input_accessory: :done
           },
           {
             title: "Maximum Score",
-            key: :maximum_score_picker,
-            items: (1..10).map { |v| v.to_s },
+            key: :max_score,
+            items: (1..10).map { |v| [v.to_s, v.round(1).to_s] },
             value: @group.max_score.to_i.to_s,
             type: :picker,
-            input_accessory: :done,
-            done_action: lambda { save }
+            input_accessory: :done
           },
           {
             title: "Interval",
-            key: :interval_picker,
-            items: (0.1..1.0).step(0.1).map { |v| v.round(1).to_s },
+            key: :interval,
+            items: [0.1, 0.5, 1.0].map { |v| v.round(1).to_s },
             value: @group.interval.to_f.round(1).to_s,
             type: :picker,
-            input_accessory: :done,
-            done_action: lambda { save }
+            input_accessory: :done
           },
           {
             title: "Exclude Score After Weeks",
-            key: :exclude_score,
+            key: :exclude_score_after_weeks,
             items: ["0", "1", "2", "3", "4", "6", "12"],
             value: @group.exclude_score_after_weeks.to_i.to_s,
             type: :picker,
-            input_accessory: :done,
-            done_action: lambda { save }
+            input_accessory: :done
           },
           {
-            title: "Reset Scores",
-            key: :reset_scores,
-            type: :static
+            title: "Update Settings",
+            key: :update_settings,
+            type: :submit
           }
         ]
       }]
     })
-  end
 
-  def save
-    data = self.form.render
-    @group.name = data[:group_name]
-    @group.password = data[:password]
-    @group.max_score = data[:maximum_score_picker].to_f.round(1)
-    @group.interval = data[:interval_picker].to_f.round(1)
-    @group.save
+    @form.on_submit do |form|
+      data = form.render
+
+      ApiHandler.alloc.init.update_group(data) do |result|
+        if result.success?
+          self.navigationController.popViewControllerAnimated(true)
+        end
+      end
+    end
+
+    @form
   end
 
 end

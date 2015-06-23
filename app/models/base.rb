@@ -1,6 +1,7 @@
 class Base
 
   def initialize(properties = {})
+
     properties.each do |key, value|
       if self.class::PROPERTIES.include?(key.to_sym)
         self.send("#{key}=", value)

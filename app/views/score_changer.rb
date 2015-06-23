@@ -19,23 +19,23 @@ class ScoreChanger < UIView
       next unless @group.id
 
       interval = @group.interval.to_f * interval_modifier.to_f
-      score = @user.score + interval
+      score = @user.score.to_f + interval
       next if score_out_of_range?(score)
 
       animate_score_change
       update_user_score(score)
 
-      # @group_average_score_value.hidden = true
-      # @group_average_score_activity.startAnimating
+      # @group_panel.value.hidden = true
+      # @group_panel.indicator.startAnimating
 
       @last_tapped = Time.now
 
       App.run_after(score_change_delay) do
         if Time.now - @last_tapped >= score_change_delay
-          ApiHandler.alloc.init.set_user_score
+          ApiHandler.alloc.init.update_user_score
           # App.run_after(0.1) do
-          #   @group_average_score_activity.stopAnimating
-          #   @group_average_score_value.hidden = false
+          #   @group_panel.indicator.stopAnimating
+          #   @group_panel.value.hidden = false
           # end
         end
       end
