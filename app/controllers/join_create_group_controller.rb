@@ -119,7 +119,7 @@ class JoinCreateGroupController < Formotion::FormController
     data = @form.render
     params = { name: data[:create_name], password: data[:create_password] }
 
-    # raise "Passwords don't match." if data[:create_password] != data[:create_password_confirm]
+    # client-side validation - raise "Passwords don't match." if data[:create_password] != data[:create_password_confirm]
 
     ApiHandler.alloc.init.create_group(params) do |result|
       if result.success?

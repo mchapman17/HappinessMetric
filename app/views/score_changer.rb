@@ -1,11 +1,14 @@
 class ScoreChanger < UIView
 
+  include ViewTags
+
   def initWithFrame(frame, shape: shape, interval_modifier: interval_modifier)
     self.initWithFrame(frame)
 
     @app_delegate ||= UIApplication.sharedApplication.delegate
     @user ||= @app_delegate.user
     @group ||= @app_delegate.group
+    @score ||= @app_delegate.score
 
     self.backgroundColor = "#FFFF19".to_color
     self.layer.opacity = 0.8
@@ -19,24 +22,27 @@ class ScoreChanger < UIView
       next unless @group.id
 
       interval = @group.interval.to_f * interval_modifier.to_f
-      score = @user.score.to_f + interval
+      score = @score.score.to_f + interval
       next if score_out_of_range?(score)
 
       animate_score_change
-      update_user_score(score)
+      update_local_score(score)
 
-      # @group_panel.value.hidden = true
-      # @group_panel.indicator.startAnimating
+      indicator = self.superview.superview.viewWithTag(ViewTags::INDICATOR)
+      group_value = self.superview.superview.viewWithTag(ViewTags::GROUP_VALUE)
+
+      group_value.hidden = true
+      indicator.startAnimating
 
       @last_tapped = Time.now
 
       App.run_after(score_change_delay) do
         if Time.now - @last_tapped >= score_change_delay
-          ApiHandler.alloc.init.update_user_score
-          # App.run_after(0.1) do
-          #   @group_panel.indicator.stopAnimating
-          #   @group_panel.value.hidden = false
-          # end
+          ApiHandler.alloc.init.update_score
+          App.run_after(0.1) do
+            indicator.stopAnimating
+            group_value.hidden = false
+          end
         end
       end
     end
@@ -59,9 +65,9 @@ class ScoreChanger < UIView
     )
   end
 
-  def update_user_score(score)
-    @user.score = score.round(1) + 0.0 # the +0.0 fixes weird float bug when score is set to zero
-    @user.save
+  def update_local_score(score)
+    @score.score = score.round(1) + 0.0 # the +0.0 fixes weird float bug when score is set to zero
+    @score.save
   end
 
   def score_out_of_range?(score)

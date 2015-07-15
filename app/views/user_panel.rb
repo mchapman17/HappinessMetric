@@ -8,10 +8,12 @@ class UserPanel < UIView
     @app_delegate ||= UIApplication.sharedApplication.delegate
     @user ||= @app_delegate.user
     @group ||= @app_delegate.group
+    @score ||= @app_delegate.score
 
     add_label
     add_circle
     add_value
+    add_max_score
     add_increaser
     add_decreaser
   end
@@ -21,7 +23,7 @@ class UserPanel < UIView
 
   def add_label
     @label = UILabel.alloc.initWithFrame(CGRectZero)
-    @label.text = "Your Happiness Score"
+    @label.text = "Your Score"
     @label.textColor = Group::COLOR
     @label.font = UIFont.fontWithName("HelveticaNeue-Medium", size: 24)
     @label.sizeToFit
@@ -41,18 +43,38 @@ class UserPanel < UIView
 
   def add_value
     @value = UILabel.alloc.initWithFrame(CGRectZero)
-    @value.text = @user.formatted_score
+    @value.text = @score.formatted_score
     @value.textColor = UIColor.whiteColor
     @value.font = UIFont.fontWithName("HelveticaNeue", size: 84)
     @value.sizeToFit
     @value.position = CGPointMake(circle_radius, circle_radius)
 
-    observe(@user, :score) do |old_value, new_value|
-      @value.text = @user.formatted_score
+    observe(@score, :score) do |old_value, new_value|
+      @value.text = @score.formatted_score
       @value.sizeToFit
     end
 
     @circle.addSubview(@value)
+  end
+
+  def add_max_score
+    @max_score = UILabel.alloc.initWithFrame(CGRectZero)
+    @max_score.text = max_score_text
+    @max_score.textColor = UIColor.whiteColor
+    @max_score.font = UIFont.fontWithName("HelveticaNeue", size: 18)
+    @max_score.sizeToFit
+    @max_score.position = CGPointMake(circle_radius, circle_radius * 1.5)
+
+    observe(@group, :max_score) do |old_value, new_value|
+      @max_score.text = max_score_text
+      @max_score.sizeToFit
+    end
+
+    @circle.addSubview(@max_score)
+  end
+
+  def max_score_text
+    "out of #{@group.max_score}"
   end
 
   def add_increaser

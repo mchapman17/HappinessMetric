@@ -1,6 +1,7 @@
 class GroupPanel < UIView
 
   include BubbleWrap::KVO
+  include ViewTags
 
   def initWithFrame(frame)
     super(frame)
@@ -13,7 +14,7 @@ class GroupPanel < UIView
     add_circle
     add_value
     add_activity_indicator
-    add_user_count_label
+    add_score_count_label
   end
 
   def add_label
@@ -37,9 +38,9 @@ class GroupPanel < UIView
 
   def group_name_label_text
     if @group.id
-      "#{@group.name}\nHappiness Score"
+      "#{@group.name} Score"
     else
-      "Create or Join a Group"
+      "Join or Create a Group"
     end
   end
 
@@ -58,7 +59,7 @@ class GroupPanel < UIView
     @value.font = UIFont.fontWithName("HelveticaNeue", size: 96)
     @value.sizeToFit
     @value.position = CGPointMake(circle_radius, circle_radius)
-    # @value.tag = "group_value"
+    @value.tag = ViewTags::GROUP_VALUE
 
     observe(@group, :average_score) do |old_value, new_value|
       @value.text = @group.formatted_average_score
@@ -73,26 +74,26 @@ class GroupPanel < UIView
     @indicator.color = @value.textColor
     @indicator.transform = CGAffineTransformMakeScale(2.0, 2.0)
     @indicator.hidesWhenStopped = true
-    # @indicator.tag = "group_activity_indicator"
+    @indicator.tag = ViewTags::INDICATOR
 
     @circle.addSubview(@indicator)
   end
 
-  def add_user_count_label
-    @user_count_label = UILabel.alloc.initWithFrame(CGRectZero)
-    @user_count_label.text = user_count_label_text
-    @user_count_label.textColor = Group::COLOR
-    @user_count_label.font = UIFont.fontWithName("HelveticaNeue", size: 16)
-    @user_count_label.sizeToFit
-    @user_count_label.position = user_count_label_position
-    @user_count_label.layer.anchorPoint = CGPointMake(0.5, 0.0)
-    @user_count_label.textAlignment = UITextAlignmentCenter
+  def add_score_count_label
+    @score_count_label = UILabel.alloc.initWithFrame(CGRectZero)
+    @score_count_label.text = score_count_label_text
+    @score_count_label.textColor = Group::COLOR
+    @score_count_label.font = UIFont.fontWithName("HelveticaNeue", size: 16)
+    @score_count_label.sizeToFit
+    @score_count_label.position = score_count_label_position
+    @score_count_label.layer.anchorPoint = CGPointMake(0.5, 0.0)
+    @score_count_label.textAlignment = UITextAlignmentCenter
 
-    observe(@group, :user_count) do |old_value, new_value|
-      @user_count_label.text = user_count_label_text
+    observe(@group, :score_count) do |old_value, new_value|
+      @score_count_label.text = score_count_label_text
     end
 
-    self.addSubview(@user_count_label)
+    self.addSubview(@score_count_label)
   end
 
   def circle_radius
@@ -123,15 +124,15 @@ class GroupPanel < UIView
     CGRectMake(mid_x - circle_radius, mid_y - circle_radius, circle_diameter, circle_diameter)
   end
 
-  def user_count_label_position
+  def score_count_label_position
     CGPointMake(mid_x, CGRectGetMaxY(@circle.frame) - label_offset_top)
   end
 
-  def user_count_label_text
-    if @group.user_count == 1
+  def score_count_label_text
+    if @group.score_count == 1
       "1 score"
     else
-      "#{@group.user_count} scores"
+      "#{@group.score_count} scores"
     end
   end
 

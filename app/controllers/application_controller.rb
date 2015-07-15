@@ -1,11 +1,12 @@
 class ApplicationController < UIViewController
 
-  attr_accessor :user, :group
+  attr_accessor :user, :group, :score
 
-  def initWithUser(user, group: group)
+  def initWithUser(user, group: group, score: score)
     initWithNibName(nil, bundle: nil)
     @user = user
     @group = group
+    @score = score
 
     self.title = 'Happiness Metric'
     self.edgesForExtendedLayout = UIRectEdgeNone
@@ -23,7 +24,7 @@ class ApplicationController < UIViewController
     add_separator
     add_group_panel
 
-    ApiHandler.alloc.init.get_group if @group.id
+    ApiHandler.alloc.init.show_group if @group.id
   end
 
   def add_background
