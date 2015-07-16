@@ -63,14 +63,14 @@ class UserPanel < UIView
     @max_score.textColor = UIColor.whiteColor
     @max_score.font = UIFont.fontWithName("HelveticaNeue", size: 18)
     @max_score.sizeToFit
-    @max_score.position = CGPointMake(circle_radius, circle_radius * 1.5)
+    @max_score.position = CGPointMake(mid_x, mid_y * 1.75)
 
     observe(@group, :max_score) do |old_value, new_value|
       @max_score.text = max_score_text
       @max_score.sizeToFit
     end
 
-    @circle.addSubview(@max_score)
+    self.addSubview(@max_score)
   end
 
   def max_score_text

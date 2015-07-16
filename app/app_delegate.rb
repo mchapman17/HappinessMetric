@@ -7,10 +7,10 @@ class AppDelegate
     rootViewController.title = 'Happiness Metric'
     rootViewController.view.backgroundColor = UIColor.blackColor
 
-    @user = User.load || User.new(id: BubbleWrap.create_uuid, score: 0.0)
+    @user = User.load || User.default
     @group = Group.load || Group.default
     @score = Score.load || Score.default
-puts "score ---------------- #{@score.inspect}"
+
     @application_controller = ApplicationController.alloc.initWithUser(@user, group: @group, score: @score)
 
     @nav_controller = UINavigationController.alloc.initWithRootViewController(@application_controller)
@@ -33,6 +33,7 @@ puts "score ---------------- #{@score.inspect}"
   def save
     @user.save
     @group.save
+    @score.save
   end
 
 end

@@ -41,6 +41,7 @@ class GroupSettingsController < Formotion::FormController
     super
 
     if @form
+      puts "----- group appear: #{@group.inspect}"
       @form.values = {
         name: @group.name,
         password: @group.password,
@@ -66,8 +67,9 @@ class GroupSettingsController < Formotion::FormController
           {
             title: "Password",
             key: :password,
-            value: "********",
+            value: @group.password,
             type: :string,
+            secure: true,
             input_accessory: :done
           },
           {
@@ -89,7 +91,7 @@ class GroupSettingsController < Formotion::FormController
           {
             title: "Exclude Score After Weeks",
             key: :exclude_score_after_weeks,
-            items: ["0", "1", "2", "3", "4", "6", "12"],
+            items: ['0', '1', '2', '3', '4', '6', '12'],
             value: @group.exclude_score_after_weeks.to_i.to_s,
             type: :picker,
             input_accessory: :done
@@ -105,6 +107,9 @@ class GroupSettingsController < Formotion::FormController
 
     @form.on_submit do |form|
       data = form.render
+      puts "submit #{@group.inspect} - #{data}"
+      @group.password = data[:password]
+      @group.save
 
       ApiHandler.alloc.init.update_group(data) do |result|
         if result.success?

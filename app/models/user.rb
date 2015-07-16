@@ -9,4 +9,9 @@ class User < Base
     "user"
   end
 
+  def self.default
+    self.new(id: BubbleWrap.create_uuid, score: 0.0)
+    save
+  end
+
 end

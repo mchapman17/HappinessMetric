@@ -25,19 +25,19 @@ class ApiHandler
     end
   end
 
-  def update_group(group, &block)
-    params = { group: group, user_id: @app_delegate.user.id }
+  def join_group(group, &block)
+    params = { group: { name: group[:name], password: group[:password] }, user_id: @app_delegate.user.id }
 
-    @conn.put("groups/#{@app_delegate.group.id}", params) do |result|
+    @conn.post("groups/join", params) do |result|
       process_response(result)
       block.call(result)
     end
   end
 
-  def join_group(group, &block)
-    params = { group: { name: group[:name], password: group[:password] }, user_id: @app_delegate.user.id }
+  def update_group(group, &block)
+    params = { group: group, user_id: @app_delegate.user.id }
 
-    @conn.post("scores", params) do |result|
+    @conn.put("groups/#{@app_delegate.group.id}", params) do |result|
       process_response(result)
       block.call(result)
     end
@@ -73,6 +73,7 @@ class ApiHandler
       end
       @app_delegate.send(data_type).save
     end
+    puts "---- local data updated: #{@app_delegate.group.inspect}"
   end
 
 end
