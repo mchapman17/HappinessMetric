@@ -41,13 +41,12 @@ class GroupSettingsController < Formotion::FormController
     super
 
     if @form
-      puts "----- group appear: #{@group.inspect}"
       @form.values = {
         name: @group.name,
         password: @group.password,
         max_score: @group.max_score,
         interval: @group.interval,
-        exclude_score_after_weeks: @group.exclude_score_after_weeks
+        exclude_score_after_weeks: @group.exclude_score_after_weeks.to_s
       }
     end
   end

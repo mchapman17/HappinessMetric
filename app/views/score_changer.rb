@@ -71,7 +71,7 @@ class ScoreChanger < UIView
   end
 
   def score_out_of_range?(score)
-    score.round(1) < @group.min_score.to_f.round(1) || score.round(1) > @group.max_score.to_f.round(1)
+    score.round(1) < 0 || score.round(1) > @group.max_score.to_f.round(1)
   end
 
   def score_change_delay

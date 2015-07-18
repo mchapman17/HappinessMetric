@@ -12,13 +12,14 @@ class ApiHandler
     params = { user_id: @app_delegate.user.id }
 
     @conn.get("groups/#{@app_delegate.group.id}", params) do |result|
+      @app_delegate.group.reset if result.failure?
       process_response(result)
     end
   end
 
   def create_group(group, &block)
     params = { group: group, user_id: @app_delegate.user.id }
-
+    puts "----- group: #{group.inspect}"
     @conn.post("groups", params) do |result|
       process_response(result)
       block.call(result)
@@ -73,7 +74,6 @@ class ApiHandler
       end
       @app_delegate.send(data_type).save
     end
-    puts "---- local data updated: #{@app_delegate.group.inspect}"
   end
 
 end

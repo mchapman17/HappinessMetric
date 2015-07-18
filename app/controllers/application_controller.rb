@@ -24,7 +24,9 @@ class ApplicationController < UIViewController
     add_separator
     add_group_panel
 
-    ApiHandler.alloc.init.show_group if @group.id
+    if @group.id
+      ApiHandler.alloc.init.show_group
+    end
   end
 
   def add_background
