@@ -11,11 +11,10 @@ class AppDelegate
     @group = Group.load || Group.default
     @score = Score.load || Score.default
 
-    @application_controller = ApplicationController.alloc.initWithUser(@user, group: @group, score: @score)
+    @application_controller ||= ApplicationController.alloc.initWithUser(@user, group: @group, score: @score)
+    @nav_controller ||= UINavigationController.alloc.initWithRootViewController(@application_controller)
 
-    @nav_controller = UINavigationController.alloc.initWithRootViewController(@application_controller)
-
-    @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
+    @window ||= UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     @window.rootViewController = @nav_controller
     @window.makeKeyAndVisible
 

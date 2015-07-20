@@ -18,7 +18,7 @@ class GroupPanel < UIView
   end
 
   def add_label
-    @label = UILabel.alloc.initWithFrame(CGRectZero)
+    @label ||= UILabel.alloc.initWithFrame(CGRectZero)
     @label.text = group_name_label_text
     @label.textColor = Group::COLOR
     @label.font = UIFont.fontWithName("HelveticaNeue-Medium", size: 24)
@@ -45,7 +45,7 @@ class GroupPanel < UIView
   end
 
   def add_circle
-    @circle = UIView.alloc.initWithFrame(circle_frame)
+    @circle ||= UIView.alloc.initWithFrame(circle_frame)
     @circle.layer.cornerRadius = circle_radius
     @circle.backgroundColor = UIColor.clearColor
 
@@ -53,7 +53,7 @@ class GroupPanel < UIView
   end
 
   def add_value
-    @value = UILabel.alloc.initWithFrame(CGRectZero)
+    @value ||= UILabel.alloc.initWithFrame(CGRectZero)
     @value.text = @group.formatted_average_score
     @value.textColor = UIColor.whiteColor
     @value.font = UIFont.fontWithName("HelveticaNeue", size: 96)
@@ -70,7 +70,7 @@ class GroupPanel < UIView
   end
 
   def add_activity_indicator
-    @indicator = UIActivityIndicatorView.alloc.initWithFrame(@value.frame)
+    @indicator ||= UIActivityIndicatorView.alloc.initWithFrame(@value.frame)
     @indicator.color = @value.textColor
     @indicator.transform = CGAffineTransformMakeScale(2.0, 2.0)
     @indicator.hidesWhenStopped = true
@@ -80,7 +80,7 @@ class GroupPanel < UIView
   end
 
   def add_score_count_label
-    @score_count_label = UILabel.alloc.initWithFrame(CGRectZero)
+    @score_count_label ||= UILabel.alloc.initWithFrame(CGRectZero)
     @score_count_label.text = score_count_label_text
     @score_count_label.textColor = Group::COLOR
     @score_count_label.font = UIFont.fontWithName("HelveticaNeue", size: 16)

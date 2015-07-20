@@ -24,7 +24,7 @@ class ApplicationController < UIViewController
     add_separator
     add_group_panel
 
-    if @group.id
+    if @group.loaded?
       ApiHandler.alloc.init.show_group
     end
   end
@@ -35,10 +35,12 @@ class ApplicationController < UIViewController
   end
 
   def add_join_create_group_button
-    button = UIBarButtonItem.alloc.initWithTitle("Join/Create",
+    button ||= UIBarButtonItem.alloc.initWithTitle(
+      "Join/Create",
       style: UIBarButtonItemStyleBordered,
       target: self,
-      action: 'show_join_create_group')
+      action: 'show_join_create_group'
+    )
     self.navigationItem.leftBarButtonItem = button
   end
 
@@ -48,10 +50,12 @@ class ApplicationController < UIViewController
   end
 
   def add_group_settings_button
-    button = UIBarButtonItem.alloc.initWithTitle("Settings",
+    button ||= UIBarButtonItem.alloc.initWithTitle(
+      "Settings",
       style: UIBarButtonItemStyleBordered,
       target: self,
-      action: 'show_group_settings')
+      action: 'show_group_settings'
+    )
     self.navigationItem.rightBarButtonItem = button
   end
 
@@ -61,19 +65,19 @@ class ApplicationController < UIViewController
   end
 
   def add_user_panel
-    @user_panel = UserPanel.alloc.initWithFrame(user_panel_frame)
+    @user_panel ||= UserPanel.alloc.initWithFrame(user_panel_frame)
     self.view.addSubview(@user_panel)
   end
 
   def add_separator
-    @separator = UIView.alloc.initWithFrame(CGRectMake(0, user_panel_height, screen_width, 1))
+    @separator ||= UIView.alloc.initWithFrame(separator_frame)
     @separator.backgroundColor = UIColor.whiteColor
 
     self.view.addSubview(@separator)
   end
 
   def add_group_panel
-    @group_panel = GroupPanel.alloc.initWithFrame(group_panel_frame)
+    @group_panel ||= GroupPanel.alloc.initWithFrame(group_panel_frame)
     self.view.addSubview(@group_panel)
   end
 
@@ -115,6 +119,10 @@ class ApplicationController < UIViewController
 
   def group_panel_height
     screen_height - user_panel_height
+  end
+
+  def separator_frame
+    CGRectMake(0, user_panel_height, screen_width, 1)
   end
 
 end

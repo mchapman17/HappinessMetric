@@ -6,24 +6,19 @@ class ScoreChanger < UIView
     self.initWithFrame(frame)
 
     @app_delegate ||= UIApplication.sharedApplication.delegate
-    @user ||= @app_delegate.user
-    @group ||= @app_delegate.group
-    @score ||= @app_delegate.score
+    @group = @app_delegate.group
+    @score = @app_delegate.score
 
     self.backgroundColor = "#FFFF19".to_color
     self.layer.opacity = 0.8
-
-    mask = CAShapeLayer.alloc.init
-    mask.frame = self.bounds
-    mask.path = shape.CGPath
-    self.layer.mask = mask
+    self.layer.mask = create_mask(shape)
 
     self.when_tapped do
-      next unless @group.id
+      next unless @group.loaded?
 
       interval = @group.interval.to_f * interval_modifier.to_f
       score = @score.score.to_f + interval
-      next if score_out_of_range?(score)
+      next if @group.score_out_of_range?(score)
 
       animate_score_change
       update_local_score(score)
@@ -37,7 +32,7 @@ class ScoreChanger < UIView
       @last_tapped = Time.now
 
       App.run_after(score_change_delay) do
-        if Time.now - @last_tapped >= score_change_delay
+        if time_since_last_tapped >= score_change_delay
           ApiHandler.alloc.init.update_score
           App.run_after(0.1) do
             indicator.stopAnimating
@@ -48,6 +43,13 @@ class ScoreChanger < UIView
     end
 
     self
+  end
+
+  def create_mask(shape)
+    CAShapeLayer.alloc.init.tap do |mask|
+      mask.frame = self.bounds
+      mask.path = shape.CGPath
+    end
   end
 
   def animate_score_change
@@ -70,8 +72,8 @@ class ScoreChanger < UIView
     @score.save
   end
 
-  def score_out_of_range?(score)
-    score.round(1) < 0 || score.round(1) > @group.max_score.to_f.round(1)
+  def time_since_last_tapped
+    Time.now - @last_tapped
   end
 
   def score_change_delay

@@ -13,6 +13,14 @@ class Group < Base
     "group"
   end
 
+  def loaded?
+    !id.nil?
+  end
+
+  def score_out_of_range?(score)
+    score.round(1) < 0 || score.round(1) > max_score.to_f.round(1)
+  end
+
   def formatted_average_score
     '%.2f' % average_score.to_f
   end

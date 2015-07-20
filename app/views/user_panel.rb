@@ -6,9 +6,9 @@ class UserPanel < UIView
     super(frame)
 
     @app_delegate ||= UIApplication.sharedApplication.delegate
-    @user ||= @app_delegate.user
-    @group ||= @app_delegate.group
-    @score ||= @app_delegate.score
+    @user = @app_delegate.user
+    @group = @app_delegate.group
+    @score = @app_delegate.score
 
     add_label
     add_circle
@@ -22,7 +22,7 @@ class UserPanel < UIView
   private
 
   def add_label
-    @label = UILabel.alloc.initWithFrame(CGRectZero)
+    @label ||= UILabel.alloc.initWithFrame(CGRectZero)
     @label.text = "Your Score"
     @label.textColor = Group::COLOR
     @label.font = UIFont.fontWithName("HelveticaNeue-Medium", size: 24)
@@ -34,7 +34,7 @@ class UserPanel < UIView
   end
 
   def add_circle
-    @circle = UIView.alloc.initWithFrame(circle_frame)
+    @circle ||= UIView.alloc.initWithFrame(circle_frame)
     @circle.backgroundColor = UIColor.darkGrayColor.colorWithAlphaComponent(0.5)
     @circle.layer.cornerRadius = circle_radius
 
@@ -42,7 +42,7 @@ class UserPanel < UIView
   end
 
   def add_value
-    @value = UILabel.alloc.initWithFrame(CGRectZero)
+    @value ||= UILabel.alloc.initWithFrame(CGRectZero)
     @value.text = @score.formatted_score
     @value.textColor = UIColor.whiteColor
     @value.font = UIFont.fontWithName("HelveticaNeue", size: 84)
@@ -58,7 +58,7 @@ class UserPanel < UIView
   end
 
   def add_max_score
-    @max_score = UILabel.alloc.initWithFrame(CGRectZero)
+    @max_score ||= UILabel.alloc.initWithFrame(CGRectZero)
     @max_score.text = max_score_text
     @max_score.textColor = UIColor.whiteColor
     @max_score.font = UIFont.fontWithName("HelveticaNeue", size: 18)
@@ -78,12 +78,12 @@ class UserPanel < UIView
   end
 
   def add_increaser
-    increaser = ScoreChanger.alloc.initWithFrame(increaser_frame, shape: increaser_shape, interval_modifier: 1)
+    increaser ||= ScoreChanger.alloc.initWithFrame(increaser_frame, shape: increaser_shape, interval_modifier: 1)
     self.addSubview(increaser)
   end
 
   def add_decreaser
-    decreaser = ScoreChanger.alloc.initWithFrame(decreaser_frame, shape: decreaser_shape, interval_modifier: -1)
+    decreaser ||= ScoreChanger.alloc.initWithFrame(decreaser_frame, shape: decreaser_shape, interval_modifier: -1)
     self.addSubview(decreaser)
   end
 
