@@ -34,14 +34,15 @@ class ScoreChanger < UIView
 
       update_local_score(score)
       animate_score_change
-      display_activity_indicator(true)
+      group_panel.show_activity_indicator
 
       @last_tapped = Time.now
 
       App.run_after(score_change_delay) do
         if time_since_last_tapped >= score_change_delay
-          ApiHandler.alloc.init.update_score
-          App.run_after(0.1) { display_activity_indicator(false) } # wait 0.1s to avoid score flicker in UI
+          ApiHandler.alloc.init.update_score  do |result|
+            group_panel.hide_activity_indicator
+          end
         end
       end
     end
@@ -79,12 +80,8 @@ class ScoreChanger < UIView
     )
   end
 
-  def display_activity_indicator(hidden)
-    indicator = self.superview.superview.viewWithTag(ViewTags::INDICATOR)
-    group_value = self.superview.superview.viewWithTag(ViewTags::GROUP_VALUE)
-
-    group_value.hidden = hidden
-    hidden ? indicator.startAnimating : indicator.stopAnimating
+  def group_panel
+    self.superview.superview.viewWithTag(ViewTags::GROUP_PANEL)
   end
 
   def update_local_score(new_score)

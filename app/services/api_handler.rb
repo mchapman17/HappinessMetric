@@ -3,6 +3,7 @@ class ApiHandler
   def initialize
     @app_delegate ||= UIApplication.sharedApplication.delegate
     @conn ||= AFMotion::Client.build('http://happiness-metric.herokuapp.com/') do
+    # @conn ||= AFMotion::Client.build('http://localhost:3000/') do
       header "Accept", "application/json"
       response_serializer :json
     end
@@ -12,14 +13,16 @@ class ApiHandler
     params = { user_id: @app_delegate.user.id }
 
     @conn.get("groups/#{@app_delegate.group.id}", params) do |result|
-      @app_delegate.group.reset if result.failure?
+      if result.failure?
+        @app_delegate.group.reset
+        @app_delegate.score.reset
+      end
       process_response(result)
     end
   end
 
   def create_group(group, &block)
     params = { group: group, user_id: @app_delegate.user.id }
-    puts "----- group: #{group.inspect}"
     @conn.post("groups", params) do |result|
       process_response(result)
       block.call(result)
@@ -44,11 +47,12 @@ class ApiHandler
     end
   end
 
-  def update_score
+  def update_score(&block)
     params = { group_id: @app_delegate.group.id, user_id: @app_delegate.user.id, score: @app_delegate.score.score }
 
     @conn.put("scores/#{@app_delegate.score.id}", params) do |result|
       process_response(result)
+      block.call
     end
   end
 

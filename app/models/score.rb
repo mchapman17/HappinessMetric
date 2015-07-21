@@ -16,4 +16,9 @@ class Score < Base
     '%.1f' % score.to_f
   end
 
+  def reset
+    self.id = nil
+    self.score = 0.0
+  end
+
 end

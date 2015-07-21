@@ -15,7 +15,24 @@ class GroupPanel < UIView
     add_value
     add_activity_indicator
     add_score_count_label
+
+    self.tag = ViewTags::GROUP_PANEL
+
+    self
   end
+
+  def show_activity_indicator
+    @indicator.startAnimating
+    @value.hidden = true
+  end
+
+  def hide_activity_indicator
+    @indicator.stopAnimating
+    @value.hidden = false
+  end
+
+
+  private
 
   def add_label
     @label ||= UILabel.alloc.initWithFrame(CGRectZero)
@@ -59,7 +76,6 @@ class GroupPanel < UIView
     @value.font = UIFont.fontWithName("HelveticaNeue", size: 96)
     @value.sizeToFit
     @value.position = CGPointMake(circle_radius, circle_radius)
-    @value.tag = ViewTags::GROUP_VALUE
 
     observe(@group, :average_score) do |old_value, new_value|
       @value.text = @group.formatted_average_score
@@ -74,7 +90,6 @@ class GroupPanel < UIView
     @indicator.color = @value.textColor
     @indicator.transform = CGAffineTransformMakeScale(2.0, 2.0)
     @indicator.hidesWhenStopped = true
-    @indicator.tag = ViewTags::INDICATOR
 
     @circle.addSubview(@indicator)
   end

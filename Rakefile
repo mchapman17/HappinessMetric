@@ -16,5 +16,5 @@ Motion::Project::App.setup do |app|
 
   app.interface_orientations = [:portrait]
 
-  app.info_plist['API_HOST'] = YAML.load_file("config/config.yml")[app.]
+  # app.info_plist['API_HOST'] = YAML.load_file("config/config.yml")
 end
