@@ -14,5 +14,7 @@ Motion::Project::App.setup do |app|
   app.name = 'Happiness Metric'
   app.version = VERSION
 
-  # app.info_plist['AppConfig'] = YAML.load_file("config/config.yml")
+  app.interface_orientations = [:portrait]
+
+  app.info_plist['API_HOST'] = YAML.load_file("config/config.yml")[app.]
 end

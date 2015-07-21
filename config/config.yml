@@ -1,6 +1,6 @@
 
 development:
-  api_host: http://localhost:3000/
+  host: http://localhost:3000/
 
 release:
-  api_host: http://happiness-metric.herokuapp.com/happiness/
+  host: http://happiness-metric.herokuapp.com/

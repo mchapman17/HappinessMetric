@@ -17,12 +17,12 @@ class Group < Base
     !id.nil?
   end
 
-  def score_out_of_range?(score)
-    score.round(1) < 0 || score.round(1) > max_score.to_f.round(1)
-  end
-
   def formatted_average_score
     '%.2f' % average_score.to_f
+  end
+
+  def score_in_range?(score)
+    score.round(1) >= 0 && score.round(1) <= max_score.to_f.round(1)
   end
 
   def reset

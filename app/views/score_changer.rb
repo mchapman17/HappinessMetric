@@ -2,6 +2,8 @@ class ScoreChanger < UIView
 
   include ViewTags
 
+  COLOR = "#FFFF19".to_color
+
   def initWithFrame(frame, shape: shape, interval_modifier: interval_modifier)
     self.initWithFrame(frame)
 
@@ -9,43 +11,53 @@ class ScoreChanger < UIView
     @group = @app_delegate.group
     @score = @app_delegate.score
 
-    self.backgroundColor = "#FFFF19".to_color
-    self.layer.opacity = 0.8
-    self.layer.mask = create_mask(shape)
+    @shape = shape
+    @interval_modifier = interval_modifier
 
+    set_background
+    set_tap_action
+
+    self
+  end
+
+
+  private
+
+  attr_reader :group, :score, :shape, :interval_modifier
+
+  def set_tap_action
     self.when_tapped do
-      next unless @group.loaded?
+      next unless group.loaded?
 
-      interval = @group.interval.to_f * interval_modifier.to_f
-      score = @score.score.to_f + interval
-      next if @group.score_out_of_range?(score)
+      score = calculate_new_score
+      next unless group.score_in_range?(score)
 
-      animate_score_change
       update_local_score(score)
-
-      indicator = self.superview.superview.viewWithTag(ViewTags::INDICATOR)
-      group_value = self.superview.superview.viewWithTag(ViewTags::GROUP_VALUE)
-
-      group_value.hidden = true
-      indicator.startAnimating
+      animate_score_change
+      display_activity_indicator(true)
 
       @last_tapped = Time.now
 
       App.run_after(score_change_delay) do
         if time_since_last_tapped >= score_change_delay
           ApiHandler.alloc.init.update_score
-          App.run_after(0.1) do
-            indicator.stopAnimating
-            group_value.hidden = false
-          end
+          App.run_after(0.1) { display_activity_indicator(false) } # wait 0.1s to avoid score flicker in UI
         end
       end
     end
-
-    self
   end
 
-  def create_mask(shape)
+  def calculate_new_score
+    score.score.to_f + (group.interval.to_f * interval_modifier)
+  end
+
+  def set_background
+    self.backgroundColor = ScoreChanger::COLOR
+    self.layer.opacity = 0.8
+    self.layer.mask = create_mask
+  end
+
+  def create_mask
     CAShapeLayer.alloc.init.tap do |mask|
       mask.frame = self.bounds
       mask.path = shape.CGPath
@@ -67,9 +79,17 @@ class ScoreChanger < UIView
     )
   end
 
-  def update_local_score(score)
-    @score.score = score.round(1) + 0.0 # the +0.0 fixes weird float bug when score is set to zero
-    @score.save
+  def display_activity_indicator(hidden)
+    indicator = self.superview.superview.viewWithTag(ViewTags::INDICATOR)
+    group_value = self.superview.superview.viewWithTag(ViewTags::GROUP_VALUE)
+
+    group_value.hidden = hidden
+    hidden ? indicator.startAnimating : indicator.stopAnimating
+  end
+
+  def update_local_score(new_score)
+    score.score = new_score.round(1) + 0.0 # the +0.0 fixes weird float bug when score is set to zero
+    score.save
   end
 
   def time_since_last_tapped

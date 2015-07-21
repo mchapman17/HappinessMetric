@@ -1,7 +1,5 @@
 class ApplicationController < UIViewController
 
-  attr_accessor :user, :group, :score
-
   def initWithUser(user, group: group, score: score)
     initWithNibName(nil, bundle: nil)
     @user = user
@@ -24,10 +22,13 @@ class ApplicationController < UIViewController
     add_separator
     add_group_panel
 
-    if @group.loaded?
-      ApiHandler.alloc.init.show_group
-    end
+    ApiHandler.alloc.init.show_group if group.loaded?
   end
+
+
+  private
+
+  attr_reader :user, :group, :score
 
   def add_background
     background = UIImageView.alloc.initWithImage(UIImage.imageNamed('background.png'))
@@ -60,7 +61,7 @@ class ApplicationController < UIViewController
   end
 
   def show_group_settings
-    @group_settings_controller ||= GroupSettingsController.alloc.initWithGroup(@group)
+    @group_settings_controller ||= GroupSettingsController.alloc.initWithGroup(group)
     self.navigationController.pushViewController(@group_settings_controller, animated: true)
   end
 

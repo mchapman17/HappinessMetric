@@ -2,7 +2,7 @@ class ApiHandler
 
   def initialize
     @app_delegate ||= UIApplication.sharedApplication.delegate
-    @conn ||= AFMotion::Client.build('http://localhost:3000/') do
+    @conn ||= AFMotion::Client.build('http://happiness-metric.herokuapp.com/') do
       header "Accept", "application/json"
       response_serializer :json
     end
