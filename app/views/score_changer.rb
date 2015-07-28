@@ -25,6 +25,12 @@ class ScoreChanger < UIView
 
   attr_reader :group, :score, :shape, :interval_modifier
 
+  def set_background
+    self.backgroundColor = ScoreChanger::COLOR
+    self.layer.opacity = 0.8
+    self.layer.mask = create_mask
+  end
+
   def set_tap_action
     self.when_tapped do
       next unless group.loaded?
@@ -50,12 +56,6 @@ class ScoreChanger < UIView
 
   def calculate_new_score
     score.score.to_f + (group.interval.to_f * interval_modifier)
-  end
-
-  def set_background
-    self.backgroundColor = ScoreChanger::COLOR
-    self.layer.opacity = 0.8
-    self.layer.mask = create_mask
   end
 
   def create_mask

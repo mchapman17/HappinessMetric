@@ -51,6 +51,8 @@ GEM
     molinillo (0.2.1)
     motion-cocoapods (1.7.0)
       cocoapods (>= 0.34)
+    motion-facon (0.5.0.1)
+    motion-redgreen (1.0.0)
     motion-require (0.2.0)
     nap (0.8.0)
     netrc (0.7.8)
@@ -70,4 +72,6 @@ DEPENDENCIES
   afmotion (~> 2.0)
   bubble-wrap
   formotion
+  motion-facon
+  motion-redgreen
   rake

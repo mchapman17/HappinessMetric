@@ -4,8 +4,12 @@ require 'motion/project/template/ios'
 require 'bubble-wrap'
 require 'formotion'
 require 'bundler'
-# require 'motion-support/inflector'
-Bundler.require
+
+if ARGV.join(' ') =~ /spec/
+  Bundler.require :default, :test
+else
+  Bundler.require
+end
 
 VERSION = '1.0'
 
@@ -15,6 +19,8 @@ Motion::Project::App.setup do |app|
   app.version = VERSION
 
   app.interface_orientations = [:portrait]
+
+  app.redgreen_style = :progress
 
   # app.info_plist['API_HOST'] = YAML.load_file("config/config.yml")
 end

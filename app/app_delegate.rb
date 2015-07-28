@@ -3,10 +3,6 @@ class AppDelegate
   attr_accessor :user, :group, :score
 
   def application(application, didFinishLaunchingWithOptions: launchOptions)
-    rootViewController = UIViewController.alloc.init
-    rootViewController.title = 'Happiness Metric'
-    rootViewController.view.backgroundColor = UIColor.blackColor
-
     @user = User.load || User.default
     @group = Group.load || Group.default
     @score = Score.load || Score.default

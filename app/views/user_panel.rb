@@ -81,11 +81,13 @@ class UserPanel < UIView
 
   def add_increaser
     @increaser ||= ScoreChanger.alloc.initWithFrame(increaser_frame, shape: increaser_shape, interval_modifier: 1)
+    @increaser.accessibilityLabel = "score increaser"
     self.addSubview(@increaser)
   end
 
   def add_decreaser
     @decreaser ||= ScoreChanger.alloc.initWithFrame(decreaser_frame, shape: decreaser_shape, interval_modifier: -1)
+    @decreaser.accessibilityLabel = "score increaser"
     self.addSubview(@decreaser)
   end
 

@@ -56,6 +56,9 @@ class ApiHandler
     end
   end
 
+
+  private
+
   def process_response(result)
     if result.success?
       puts "RESULT SUCCESS :) - #{result.object}"
